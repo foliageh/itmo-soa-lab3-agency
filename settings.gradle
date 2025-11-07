@@ -1,0 +1,7 @@
+rootProject.name = 'itmo-soa-lab3-agency'
+include 'config-server', 'discovery-server', 'api-gateway', 'agency-service'
+
+include 'config-server'
+include 'discovery-server'
+include 'api-gateway'
+include 'agency-service'

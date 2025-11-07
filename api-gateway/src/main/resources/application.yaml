@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    inetutils:
+      preferred-networks: 127.0.0.1
+
+server:
+  port: 8443
+  ssl:
+    key-store: classpath:certs/backend.p12
+    key-store-password: changeit
+    key-store-type: PKCS12
+    enabled: true
+
+eureka:
+  client:
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    registry-fetch-interval-seconds: 5
+  instance:
+    hostname: localhost
+    ip-address: 127.0.0.1
+    prefer-ip-address: true
+    non-secure-port-enabled: true
+    secure-port-enabled: true
+    secure-port: ${server.port}
+    metadata-map:
+      zuul.proto: http
+
+ribbon:
+  eureka:
+    enabled: true
+  # Отключаем HTTPS для внутренних сервисов
+  IsSecure: false
+  # Явно указываем протокол через метаданные
+  NIWSServerListClassName: com.netflix.niws.loadbalancer.DiscoveryEnabledNIWSServerList
+  ServerListRefreshInterval: 5000
+  # Отключаем SSL для внутренних вызовов
+  IsClientAuthRequired: false
+  IsHostnameValidationRequired: false
+
+zuul:
+  routes:
+    agency-service:
+      path: /api/agency/**
+      serviceId: agency-service
+      strip-prefix: false
+  sensitive-headers:  # Отключаем фильтрацию заголовков
+  ignore-security-headers: false
+  ssl-hostname-validation-enabled: false
+#  ignored-services: '*'  # Игнорируем все остальные сервисы
+#  add-proxy-headers: true
+  ribbon-isolation-strategy: THREAD
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,routes,refresh
+  endpoint:
+    health:
+      show-details: always
