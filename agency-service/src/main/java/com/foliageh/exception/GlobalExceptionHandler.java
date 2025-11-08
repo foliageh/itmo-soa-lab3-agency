@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -20,10 +21,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex) {
 
-        var body = new HashMap<String, Object>();
+        HashMap<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
 
-        var errors = ex.getBindingResult()
+        List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(x -> x.getField() + ": " + x.getDefaultMessage())
@@ -38,21 +39,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex) {
 
-        var body = new HashMap<String, Object>();
+        HashMap<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
 
-        if (ex.getCause() instanceof InvalidFormatException invalidFormatException) {
-
+        if (ex.getCause() instanceof InvalidFormatException) {
+            InvalidFormatException invalidFormatException = (InvalidFormatException) ex.getCause();
             if (invalidFormatException.getTargetType().isEnum()) {
-                var fieldName = invalidFormatException.getPath().getFirst().getFieldName();
-                var receivedValue = invalidFormatException.getValue().toString();
+                String fieldName = invalidFormatException.getPath().get(0).getFieldName();
+                String receivedValue = invalidFormatException.getValue().toString();
 
-                var enumConstants = invalidFormatException.getTargetType().getEnumConstants();
-                var enumValues = Arrays.stream(enumConstants)
+                Object[] enumConstants = invalidFormatException.getTargetType().getEnumConstants();
+                String[] enumValues = Arrays.stream(enumConstants)
                         .map(obj -> ((Enum<?>) obj).name())
                         .toArray(String[]::new);
 
-                var errorMessage = String.format(
+                String errorMessage = String.format(
                         "Поле '%s' имеет недопустимое значение '%s'. Допустимые значения: %s",
                         fieldName, receivedValue, String.join(", ", enumValues)
                 );

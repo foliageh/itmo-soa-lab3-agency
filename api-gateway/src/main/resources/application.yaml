@@ -1,10 +1,3 @@
-spring:
-  application:
-    name: api-gateway
-  cloud:
-    inetutils:
-      preferred-networks: 127.0.0.1
-
 server:
   port: 8443
   ssl:
@@ -18,47 +11,32 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka/
-    registry-fetch-interval-seconds: 5
   instance:
-    hostname: localhost
-    ip-address: 127.0.0.1
     prefer-ip-address: true
-    non-secure-port-enabled: true
-    secure-port-enabled: true
     secure-port: ${server.port}
-    metadata-map:
-      zuul.proto: http
+    secure-port-enabled: true
+    lease-expiration-duration-in-seconds: 2
+    lease-renewal-interval-in-seconds: 1
 
 ribbon:
   eureka:
     enabled: true
-  # Отключаем HTTPS для внутренних сервисов
-  IsSecure: false
-  # Явно указываем протокол через метаданные
-  NIWSServerListClassName: com.netflix.niws.loadbalancer.DiscoveryEnabledNIWSServerList
-  ServerListRefreshInterval: 5000
-  # Отключаем SSL для внутренних вызовов
-  IsClientAuthRequired: false
+  IsSecure: false  # Отключаем HTTPS для внутренних сервисов
+  IsClientAuthRequired: false  # Отключаем SSL для внутренних вызовов
   IsHostnameValidationRequired: false
 
 zuul:
+  prefix: api/
   routes:
     agency-service:
-      path: /api/agency/**
-      serviceId: agency-service
+      path: /agency/**
+      service-id: agency-service
       strip-prefix: false
-  sensitive-headers:  # Отключаем фильтрацию заголовков
-  ignore-security-headers: false
+  ignored-services: '*'
   ssl-hostname-validation-enabled: false
-#  ignored-services: '*'  # Игнорируем все остальные сервисы
-#  add-proxy-headers: true
-  ribbon-isolation-strategy: THREAD
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,routes,refresh
-  endpoint:
-    health:
-      show-details: always
+#logging:
+#  level:
+#    org.springframework.cloud.netflix.zuul: DEBUG
+#    com.netflix.loadbalancer: DEBUG
+#    com.netflix.zuul: DEBUG

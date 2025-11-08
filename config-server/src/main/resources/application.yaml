@@ -2,21 +2,20 @@ server:
   port: 8888
 
 spring:
+  application:
+    name: config-server
   profiles:
     active: native
   cloud:
+    inetutils:
+      preferred-networks: 127.0.0.1
     config:
       server:
         native:
           search-locations: classpath:/config-repo
-    inetutils:
-      preferred-networks: 127.0.0.1
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,refresh
-  endpoint:
-    health:
-      show-details: always
+        include: '*'

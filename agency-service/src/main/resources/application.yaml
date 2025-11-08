@@ -1,10 +1,7 @@
 server:
-  port: 0 # Случайный порт для регистрации в Eureka
+  port: 8444 # 0 - Случайный порт для регистрации в Eureka
 
 spring:
-  cloud:
-    inetutils:
-      preferred-networks: 127.0.0.1
   datasource:
     url: jdbc:postgresql://localhost:5432/shrew?useSSL=false
     username: postgres
@@ -24,33 +21,10 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
-    registry-fetch-interval-seconds: 5
   instance:
     hostname: localhost
-    ip-address: 127.0.0.1
-    prefer-ip-address: true  # Используем IP для регистрации
-
-    # ЯВНО указываем, что сервис работает по HTTP
+    prefer-ip-address: false
     non-secure-port: ${server.port}
-    non-secure-port-enabled: true
-    secure-port-enabled: false
-
-    instance-id: ${spring.application.name}:${random.value}:${server.port}
-
-    # Метаданные для правильной работы Ribbon
-    metadata-map:
-      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}:${server.port}
-      management.port: ${server.port}
-      proto: http
-
-    lease-renewal-interval-in-seconds: 5
-    lease-expiration-duration-in-seconds: 10
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,refresh
-    endpoint:
-      health:
-        show-details: always
+    lease-expiration-duration-in-seconds: 2
+    lease-renewal-interval-in-seconds: 1
+    #instance-id: ${spring.application.name}:${random.value}

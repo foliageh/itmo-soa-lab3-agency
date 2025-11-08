@@ -24,7 +24,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         flatRepository.deleteAll();
 
         // Создание и сохранение тестовых квартир
-        List<Flat> flats = List.of(
+        List<Flat> flats = java.util.Arrays.asList(
                 buildFlat(
                         "Luxury Apartment",
                         new Coordinates(10L, -100.0f),

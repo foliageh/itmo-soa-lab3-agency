@@ -1,1 +1,13 @@
 # Общие настройки для всех сервисов
+spring:
+  profiles:
+    active: native
+  cloud:
+    inetutils:
+      preferred-networks: 127.0.0.1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

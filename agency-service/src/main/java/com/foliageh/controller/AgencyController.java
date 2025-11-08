@@ -47,7 +47,7 @@ public class AgencyController {
                 ErrorResponse errorResponse = ErrorResponse.builder()
                         .timestamp(LocalDateTime.now())
                         .message("Квартира с указанными параметрами не найдена")
-                        .errors(List.of("Не найдено квартир с балконом: " + withBalcony +
+                        .errors(java.util.Arrays.asList("Не найдено квартир с балконом: " + withBalcony +
                                 " и критерием цены: " + (cheapest ? "дешевые" : "дорогие")))
                         .build();
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
@@ -56,7 +56,7 @@ public class AgencyController {
             ErrorResponse errorResponse = ErrorResponse.builder()
                     .timestamp(LocalDateTime.now())
                     .message("Внутренняя ошибка сервера при поиске квартиры")
-                    .errors(List.of(e.getMessage()))
+                    .errors(java.util.Arrays.asList(e.getMessage()))
                     .build();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
@@ -81,7 +81,7 @@ public class AgencyController {
                 ErrorResponse errorResponse = ErrorResponse.builder()
                         .timestamp(LocalDateTime.now())
                         .message("Не удалось найти одну или несколько квартир для сравнения")
-                        .errors(List.of("Проверьте существование квартир с ID: " + id1 + ", " + id2 + ", " + id3))
+                        .errors(java.util.Arrays.asList("Проверьте существование квартир с ID: " + id1 + ", " + id2 + ", " + id3))
                         .build();
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
             }
@@ -89,7 +89,7 @@ public class AgencyController {
             ErrorResponse errorResponse = ErrorResponse.builder()
                     .timestamp(LocalDateTime.now())
                     .message("Внутренняя ошибка сервера при сравнении квартир")
-                    .errors(List.of(e.getMessage()))
+                    .errors(java.util.Arrays.asList(e.getMessage()))
                     .build();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }

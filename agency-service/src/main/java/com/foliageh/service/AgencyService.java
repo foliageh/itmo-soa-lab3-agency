@@ -30,6 +30,6 @@ public class AgencyService {
     public Optional<Flat> getMostExpensiveAmongThree(Long id1, Long id2, Long id3) {
         List<Long> ids = Arrays.asList(id1, id2, id3);
         List<Flat> flats = flatRepository.findByIdIn(ids);
-        return flats.stream().max(Comparator.comparingDouble(Flat::getPrice)).stream().findFirst();
+        return flats.stream().max(Comparator.comparingDouble(Flat::getPrice));
     }
 }
