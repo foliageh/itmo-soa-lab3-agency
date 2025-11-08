@@ -27,29 +27,29 @@ public class DatabaseInitializer implements CommandLineRunner {
         List<Flat> flats = java.util.Arrays.asList(
                 buildFlat(
                         "Luxury Apartment",
-                        new Coordinates(10L, -100.0f),
-                        new House("Elite Tower", 2020L, 25, 4),
+                        new Coordinates(10, -100.0f),
+                        new House("Elite Tower", 2020, 25, 4),
                         100, 3, 75.5, 15_000_000, true,
                         Furnish.DESIGNER, Transport.ENOUGH
                 ),
                 buildFlat(
                         "Comfort Flat",
-                        new Coordinates(20L, 200.5f),
-                        new House("Comfort House", 2015L, 9, 2),
+                        new Coordinates(20, 200.5f),
+                        new House("Comfort House", 2015, 9, 2),
                         65, 2, 45.0, 8_000_000, false,
                         Furnish.FINE, Transport.LITTLE
                 ),
                 buildFlat(
                         "Studio Downtown",
-                        new Coordinates(30L, -500.0f),
-                        new House("Sky Residence", 2022L, 30, 6),
+                        new Coordinates(30, -500.0f),
+                        new House("Sky Residence", 2022, 30, 6),
                         45, 1, 35.2, 5_000_000, true,
                         Furnish.LITTLE, Transport.FEW
                 ),
                 buildFlat(
                         "Family Apartment",
-                        new Coordinates(40L, 300.2f),
-                        new House("City View", 2018L, 12, 3),
+                        new Coordinates(40, 300.2f),
+                        new House("City View", 2018, 12, 3),
                         120, 4, 90.0, 12_000_000, true,
                         Furnish.FINE, Transport.ENOUGH
                 )

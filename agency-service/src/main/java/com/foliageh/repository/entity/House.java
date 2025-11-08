@@ -29,7 +29,7 @@ public class House {
     @NotNull(message = "Год не может быть null")
     @Min(value = 1, message = "Год должен быть больше 0")
     @Max(value = 2025, message = "Год не может превышать 370")
-    private Long year;
+    private Integer year;
 
     @JsonProperty("number_of_floors")
     @Column(name = "number_of_floors", nullable = false)

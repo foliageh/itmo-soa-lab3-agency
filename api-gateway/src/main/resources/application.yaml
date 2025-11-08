@@ -8,32 +8,22 @@ server:
 
 eureka:
   client:
-    fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka/
   instance:
     prefer-ip-address: true
-    secure-port: ${server.port}
     secure-port-enabled: true
+    secure-port: ${server.port}
     lease-expiration-duration-in-seconds: 2
     lease-renewal-interval-in-seconds: 1
 
-ribbon:
-  eureka:
-    enabled: true
-  IsSecure: false  # Отключаем HTTPS для внутренних сервисов
-  IsClientAuthRequired: false  # Отключаем SSL для внутренних вызовов
-  IsHostnameValidationRequired: false
-
 zuul:
-  prefix: api/
   routes:
     agency-service:
-      path: /agency/**
+      path: /api/agency/**
       service-id: agency-service
       strip-prefix: false
   ignored-services: '*'
-  ssl-hostname-validation-enabled: false
 
 #logging:
 #  level:

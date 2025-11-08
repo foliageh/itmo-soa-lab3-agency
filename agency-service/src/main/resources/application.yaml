@@ -1,5 +1,5 @@
 server:
-  port: 8444 # 0 - Случайный порт для регистрации в Eureka
+  port: 0
 
 spring:
   datasource:
@@ -25,6 +25,6 @@ eureka:
     hostname: localhost
     prefer-ip-address: false
     non-secure-port: ${server.port}
+    instance-id: ${spring.application.name}:${random.value}
     lease-expiration-duration-in-seconds: 2
     lease-renewal-interval-in-seconds: 1
-    #instance-id: ${spring.application.name}:${random.value}

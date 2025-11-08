@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface FlatRepository extends JpaRepository<Flat, Long> {
+public interface FlatRepository extends JpaRepository<Flat, Integer> {
     // Для AgencyService
     List<Flat> findByHasBalconyOrderByPriceAsc(boolean hasBalcony);
     List<Flat> findByHasBalconyOrderByPriceDesc(boolean hasBalcony);
-    List<Flat> findByIdIn(List<Long> ids);
+    List<Flat> findByIdIn(List<Integer> ids);
 }

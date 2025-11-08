@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 public class Coordinates {
     @NotNull
     @DecimalMin(value = "-12.999", inclusive = true)
-    private Long x;
+    private Integer x;
 
     @NotNull
     @DecimalMin(value = "-732.999", inclusive = true)

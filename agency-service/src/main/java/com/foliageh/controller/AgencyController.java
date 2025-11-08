@@ -72,7 +72,7 @@ public class AgencyController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/get-most-expensive/{id1}/{id2}/{id3}")
-    public ResponseEntity<?> getMostExpensive(@PathVariable Long id1, @PathVariable Long id2, @PathVariable Long id3) {
+    public ResponseEntity<?> getMostExpensive(@PathVariable Integer id1, @PathVariable Integer id2, @PathVariable Integer id3) {
         try {
             Optional<Flat> flat = agencyService.getMostExpensiveAmongThree(id1, id2, id3);
             if (flat.isPresent()) {
