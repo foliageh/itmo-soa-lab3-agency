@@ -24,6 +24,7 @@ zuul:
       service-id: agency-service
       strip-prefix: false
   ignored-services: '*'
+  sensitive-headers:
 
 #logging:
 #  level:
