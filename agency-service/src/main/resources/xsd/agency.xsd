@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://example.com/agency/schemas"
+           targetNamespace="http://example.com/agency/schemas"
+           elementFormDefault="qualified">
+
+    <xs:element name="FindWithBalconyRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="cheapest" type="xs:boolean"/>
+                <xs:element name="withBalcony" type="xs:boolean"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="FindWithBalconyResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="flat" type="tns:Flat" minOccurs="0"/>
+                <xs:element name="error" type="tns:ErrorResponse" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetMostExpensiveRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="id1" type="xs:int"/>
+                <xs:element name="id2" type="xs:int"/>
+                <xs:element name="id3" type="xs:int"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="GetMostExpensiveResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="flat" type="tns:Flat" minOccurs="0"/>
+                <xs:element name="error" type="tns:ErrorResponse" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="Flat">
+        <xs:sequence>
+            <xs:element name="id" type="xs:int"/>
+            <xs:element name="creationDate" type="xs:string"/>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="coordinates" type="tns:Coordinates"/>
+            <xs:element name="area" type="xs:int" minOccurs="0"/>
+            <xs:element name="numberOfRooms" type="xs:int" minOccurs="0"/>
+            <xs:element name="livingSpace" type="xs:double"/>
+            <xs:element name="price" type="xs:int" minOccurs="0"/>
+            <xs:element name="hasBalcony" type="xs:boolean"/>
+            <xs:element name="furnish" type="xs:string" minOccurs="0"/>
+            <xs:element name="transport" type="xs:string" minOccurs="0"/>
+            <xs:element name="house" type="tns:House" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Coordinates">
+        <xs:sequence>
+            <xs:element name="x" type="xs:int"/>
+            <xs:element name="y" type="xs:float"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="House">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ErrorResponse">
+        <xs:sequence>
+            <xs:element name="timestamp" type="xs:string"/>
+            <xs:element name="message" type="xs:string"/>
+            <xs:element name="errors">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="error" type="xs:string" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

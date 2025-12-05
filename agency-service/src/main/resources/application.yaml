@@ -1,7 +1,9 @@
 server:
-  port: 0
+  port: 8444 #0
 
 spring:
+  ws:
+    path: /ws
   datasource:
     url: jdbc:postgresql://localhost:5432/shrew?useSSL=false
     username: postgres
@@ -25,6 +27,6 @@ eureka:
     hostname: localhost
     prefer-ip-address: false
     non-secure-port: ${server.port}
-    instance-id: ${spring.application.name}:${random.value}
+    #instance-id: ${spring.application.name}:${random.value}
     lease-expiration-duration-in-seconds: 2
     lease-renewal-interval-in-seconds: 1

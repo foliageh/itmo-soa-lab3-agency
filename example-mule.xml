@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <!-- HTTP Listener Configuration -->
+    <http:listener-config name="HTTP_Listener_config">
+        <http:listener-connection host="0.0.0.0" port="8081"/>
+    </http:listener-config>
+
+    <!-- Web Service Consumer Configuration -->
+    <ws:consumer-config name="Web_Service_Consumer_Config">
+        <ws:connection wsdlLocation="http://localhost:8080/ws/agency.wsdl"
+                       service="AgencyPortService"
+                       port="AgencyPortSoap11"/>
+    </ws:consumer-config>
+
+    <!-- REST to SOAP: Find With Balcony -->
+    <flow name="rest-to-soap-find-with-balcony">
+        <http:listener config-ref="HTTP_Listener_config"
+                       path="/api/agency/find-with-balcony/{cheapest}/{withBalcony}"
+                       allowedMethods="POST"/>
+
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/agency/schemas
+---
+{
+    ns0#FindWithBalconyRequest: {
+        cheapest: attributes.uriParams.cheapest as Boolean,
+        withBalcony: attributes.uriParams.withBalcony as Boolean
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <ws:consume config-ref="Web_Service_Consumer_Config"
+                    operation="FindWithBalcony"/>
+
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/agency/schemas
+---
+if (payload.ns0#FindWithBalconyResponse.flat != null)
+    payload.ns0#FindWithBalconyResponse.flat
+else
+    payload.ns0#FindWithBalconyResponse.error]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <choice>
+            <when expression="#[payload.message != null]">
+                <set-variable variableName="httpStatus" value="404"/>
+            </when>
+            <otherwise>
+                <set-variable variableName="httpStatus" value="200"/>
+            </otherwise>
+        </choice>
+
+        <set-payload value="#[payload]"/>
+    </flow>
+
+    <!-- REST to SOAP: Get Most Expensive -->
+    <flow name="rest-to-soap-get-most-expensive">
+        <http:listener config-ref="HTTP_Listener_config"
+                       path="/api/agency/get-most-expensive/{id1}/{id2}/{id3}"
+                       allowedMethods="POST"/>
+
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/agency/schemas
+---
+{
+    ns0#GetMostExpensiveRequest: {
+        id1: attributes.uriParams.id1 as Number,
+        id2: attributes.uriParams.id2 as Number,
+        id3: attributes.uriParams.id3 as Number
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <ws:consume config-ref="Web_Service_Consumer_Config"
+                    operation="GetMostExpensive"/>
+
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/agency/schemas
+---
+if (payload.ns0#GetMostExpensiveResponse.flat != null)
+    payload.ns0#GetMostExpensiveResponse.flat
+else
+    payload.ns0#GetMostExpensiveResponse.error]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+
+        <choice>
+            <when expression="#[payload.message != null]">
+                <set-variable variableName="httpStatus" value="404"/>
+            </when>
+            <otherwise>
+                <set-variable variableName="httpStatus" value="200"/>
+            </otherwise>
+        </choice>
+    </flow>
+
+</mule>
