@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.*;
 import lombok.Data;
 
 @Data
-@XmlRootElement(name = "FindWithBalconyRequest", namespace = "http://example.com/agency/schemas")
+@XmlRootElement(name = "find_with_balcony_request", namespace = "http://example.com/agency/schemas")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class FindWithBalconyRequest {
     
@@ -12,5 +12,5 @@ public class FindWithBalconyRequest {
     private Boolean cheapest;
     
     @XmlElement(required = true)
-    private Boolean withBalcony;
+    private Boolean with_balcony;
 }

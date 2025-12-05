@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.*;
 import lombok.Data;
 
 @Data
-@XmlRootElement(name = "GetMostExpensiveResponse", namespace = "http://example.com/agency/schemas")
+@XmlRootElement(name = "get_most_expensive_response", namespace = "http://example.com/agency/schemas")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GetMostExpensiveResponse {
     

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "House", propOrder = {"name"})
+@XmlType(name = "house", propOrder = {"name"})
 public class HouseSoapDto {
     @XmlElement
     private String name;

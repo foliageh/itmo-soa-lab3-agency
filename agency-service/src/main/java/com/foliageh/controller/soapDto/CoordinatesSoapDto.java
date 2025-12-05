@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Coordinates", propOrder = {"x", "y"})
+@XmlType(name = "coordinates", propOrder = {"x", "y"})
 public class CoordinatesSoapDto {
     @XmlElement(required = true)
     private Integer x;

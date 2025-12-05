@@ -22,7 +22,7 @@ public class AgencySoapEndpoint {
     private final AgencyService agencyService;
     private final FlatMapper flatMapper;
     
-    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "FindWithBalconyRequest")
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "find_with_balcony_response")
     @ResponsePayload
     public FindWithBalconyResponse findWithBalcony(@RequestPayload FindWithBalconyRequest request) {
         FindWithBalconyResponse response = new FindWithBalconyResponse();
@@ -30,7 +30,7 @@ public class AgencySoapEndpoint {
         try {
             Optional<Flat> flat = agencyService.findWithBalcony(
                 request.getCheapest(), 
-                request.getWithBalcony()
+                request.getWith_balcony()
             );
             
             if (flat.isPresent()) {
@@ -40,7 +40,7 @@ public class AgencySoapEndpoint {
                     .timestamp(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME))
                     .message("Квартира с указанными параметрами не найдена")
                     .errors(Arrays.asList(
-                        "Не найдено квартир с балконом: " + request.getWithBalcony() +
+                        "Не найдено квартир с балконом: " + request.getWith_balcony() +
                         " и критерием цены: " + (request.getCheapest() ? "дешевые" : "дорогие")
                     ))
                     .build());
@@ -56,7 +56,7 @@ public class AgencySoapEndpoint {
         return response;
     }
     
-    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "GetMostExpensiveRequest")
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "get_most_expensive_response")
     @ResponsePayload
     public GetMostExpensiveResponse getMostExpensive(@RequestPayload GetMostExpensiveRequest request) {
         GetMostExpensiveResponse response = new GetMostExpensiveResponse();

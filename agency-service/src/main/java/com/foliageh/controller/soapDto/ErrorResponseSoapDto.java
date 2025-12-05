@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ErrorResponse", propOrder = {"timestamp", "message", "errors"})
+@XmlType(name = "error_response", propOrder = {"timestamp", "message", "errors"})
 public class ErrorResponseSoapDto {
     
     @XmlElement(required = true)

@@ -16,13 +16,13 @@ public class FlatMapper {
         
         FlatSoapDto dto = new FlatSoapDto();
         dto.setId(flat.getId());
-        dto.setCreationDate(flat.getCreationDate() != null ? flat.getCreationDate().toString() : null);
+        dto.setCreation_date(flat.getCreationDate() != null ? flat.getCreationDate().toString() : null);
         dto.setName(flat.getName());
         dto.setArea(flat.getArea());
-        dto.setNumberOfRooms(flat.getNumberOfRooms());
-        dto.setLivingSpace(flat.getLivingSpace());
+        dto.setNumber_of_rooms(flat.getNumberOfRooms());
+        dto.setLiving_space(flat.getLivingSpace());
         dto.setPrice(flat.getPrice());
-        dto.setHasBalcony(flat.getHasBalcony());
+        dto.setHas_balcony(flat.getHasBalcony());
         dto.setFurnish(flat.getFurnish() != null ? flat.getFurnish().name() : null);
         dto.setTransport(flat.getTransport() != null ? flat.getTransport().name() : null);
         

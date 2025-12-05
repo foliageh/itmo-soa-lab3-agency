@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.*;
 import lombok.Data;
 
 @Data
-@XmlRootElement(name = "FindWithBalconyResponse", namespace = "http://example.com/agency/schemas")
+@XmlRootElement(name = "find_with_balcony_response", namespace = "http://example.com/agency/schemas")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class FindWithBalconyResponse {
     
