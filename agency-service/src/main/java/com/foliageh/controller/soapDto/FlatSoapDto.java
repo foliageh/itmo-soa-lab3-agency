@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @XmlRootElement(name = "flat", namespace = "http://example.com/agency/schemas")
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"id", "creation_date", "name", "coordinates", "area",
+@XmlType(propOrder = {"id", "creationDate", "name", "coordinates", "area",
                       "number_of_rooms", "living_space", "price", "has_balcony",
                       "furnish", "transport", "house"})
 public class FlatSoapDto {
@@ -21,7 +21,7 @@ public class FlatSoapDto {
     private Integer id;
     
     @XmlElement(required = true)
-    private String creation_date;
+    private String creationDate;
     
     @XmlElement(required = true)
     private String name;

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+        http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
+
+  <!-- HTTP Listener (фронт -> Mule) -->
+  <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
+    <http:listener-connection host="0.0.0.0" port="11080" protocol="HTTP"/>
+  </http:listener-config>
+
+  <!-- Request config к JAX-RS (localhost:8182) -->
+  <http:request-config name="JAXRS_Request_config" doc:name="HTTP Request config (JAX-RS)">
+    <http:request-connection host="localhost" port="8182" protocol="HTTP"/>
+  </http:request-config>
+
+  <!-- Request config к SOAP (localhost:8444) -->
+  <http:request-config name="SOAP_Request_config" doc:name="HTTP Request config (SOAP)">
+    <http:request-connection host="localhost" port="8444" protocol="HTTP"/>
+  </http:request-config>
+
+  <!-- =========================== 1) Proxy flow: /api/flats/* -> http://localhost:8182/itmo-soa-lab2/api/... ========================== -->
+  <flow name="proxyFlatsFlow">
+    <http:listener doc:name="Listener - /api/flats/*" config-ref="HTTP_Listener_config" path="/api/flats/*"/>
+    <logger level="INFO" doc:name="Logger - incoming flats request"
+            message="ProxyFlatsFlow received #[attributes.method] request to #[attributes.requestPath] with queryParams: #[attributes.queryParams]"/>
+    <set-variable variableName="targetPath" value="#['/itmo-soa-lab2' ++ attributes.requestPath]" doc:name="Set targetPath"/>
+    <!-- Запрос к JAX-RS. Передаём метод, query params и payload. -->
+    <http:request method="#[attributes.method]" config-ref="JAXRS_Request_config" path="#[vars.targetPath]" doc:name="Request to JAX-RS">
+      <http:headers><![CDATA[#[output application/java
+---
+{
+  "Content-Type" : "application/json; charset=UTF-8"
+}]]]></http:headers>
+    </http:request>
+    <logger level="INFO" doc:name="Logger - jaxrs response" message="JAX-RS returned status #[attributes.statusCode]"/>
+    <set-payload value="#[payload]" doc:name="Return JAX-RS response"/>
+  </flow>
+
+  <!-- =========================== 2) /agency/findWithBalcony JSON -> SOAP -> Spring SOAP -> JSON =========================== -->
+  <flow name="findWithBalconyFlow">
+    <http:listener doc:name="Listener - /agency/findWithBalcony" config-ref="HTTP_Listener_config" path="/agency/findWithBalcony"/>
+    <logger level="INFO" doc:name="Logger - incoming findWithBalcony" message="findWithBalcony called. Payload: #[payload]"/>
+
+    <!-- JSON -> SOAP envelope (формируется как строка) -->
+    <scripting:execute engine="Groovy" doc:name="Build SOAP (find_with_balcony)">
+  <scripting:code><![CDATA[
+    def cheapest = attributes?.uriParams?.cheapest ?: payload?.cheapest
+    def withBalcony = attributes?.uriParams?.withBalcony ?: payload?.withBalcony
+
+    def xml = '<?xml version="1.0" encoding="UTF-8"?>' +
+      '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="">' +
+      '<soapenv:Body>' +
+        '<find_with_balcony_request>' +
+          '<cheapest>' + cheapest + '</cheapest>' +
+          '<with_balcony>' + withBalcony + '</with_balcony>' +
+        '</find_with_balcony_request>' +
+      '</soapenv:Body>' +
+      '</soapenv:Envelope>'
+
+    message.setPayload(xml)
+  ]]></scripting:code>
+</scripting:execute>
+
+    <!-- POST SOAP envelope to Spring SOAP endpoint -->
+    <http:request config-ref="SOAP_Request_config" method="POST" path="/ws" doc:name="HTTP Request to SOAP endpoint">
+      <http:headers><![CDATA[#[output application/java
+---
+{
+  "Content-Type" : "text/xml; charset=UTF-8"
+}]]]></http:headers>
+     
+    </http:request>
+
+    <!-- Parse SOAP response -> JSON -->
+    <scripting:execute engine="Groovy" doc:name="Parse SOAP response -> JSON">
+      <scripting:code><![CDATA[
+        def xml = new groovy.util.XmlSlurper(false, false).parseText(payload.toString())
+        def body = xml.Body
+        def first = body.children().find{ true } // первый элемент внутри Body
+
+        if (first == null) {
+          message.setPayload(null)
+          return
+        }
+
+        // Проверка на error
+        def err = first.'error'
+        if (err && err.size() > 0) {
+          def errorsList = []
+          if (err.errors && err.errors.error) {
+            err.errors.error.each { e -> errorsList << (e.text() ?: "") }
+          }
+          message.setPayload([
+            timestamp: (err.timestamp?.text() ?: ""),
+            message  : (err.message?.text() ?: ""),
+            errors   : errorsList
+          ])
+          return
+        }
+
+        // Парсинг flat (если есть)
+        def f = first.'flat'
+        if (f && f.size() > 0) {
+          def coord = f.coordinates
+          def house = f.house
+          message.setPayload([
+            id              : (f.id?.text() ? f.id.text().toInteger() : null),
+            creationDate    : (f.creation_date?.text() ?: null),
+            name            : (f.name?.text() ?: null),
+            coordinates     : [
+              x: (coord?.x?.text() ? coord.x.text().toInteger() : null),
+              y: (coord?.y?.text() ? new BigDecimal(coord.y.text()) : null)
+            ],
+            area            : (f.area?.text() ? f.area.text().toInteger() : null),
+            number_of_rooms : (f.number_of_rooms?.text() ? f.number_of_rooms.text().toInteger() : null),
+            living_space    : (f.living_space?.text() ? new BigDecimal(f.living_space.text()) : null),
+            price           : (f.price?.text() ? f.price.text().toInteger() : null),
+            has_balcony     : (f.has_balcony?.text() ? f.has_balcony.text().toBoolean() : null),
+            furnish         : (f.furnish?.text() ?: null),
+            transport       : (f.transport?.text() ?: null),
+            house           : [ name: (house?.name?.text() ?: null) ]
+          ])
+          return
+        }
+
+        // ни error ни flat
+        message.setPayload(null)
+      ]]></scripting:code>
+    </scripting:execute>
+
+    <logger level="INFO" doc:name="Logger - findWithBalcony response" message="Returning JSON: #[payload]"/>
+  </flow>
+
+  <!-- =========================== 3) /agency/getMostExpensive JSON -> SOAP -> Spring SOAP -> JSON =========================== -->
+  <flow name="getMostExpensiveFlow">
+    <http:listener doc:name="Listener - /agency/getMostExpensive" config-ref="HTTP_Listener_config" path="/agency/getMostExpensive"/>
+    <logger level="INFO" doc:name="Logger - incoming getMostExpensive" message="getMostExpensive called. Payload: #[payload]"/>
+
+    <!-- JSON -> SOAP envelope (string) -->
+    <scripting:execute engine="Groovy" doc:name="Build SOAP (get_most_expensive)">
+  <scripting:code><![CDATA[
+    def id1 = attributes?.uriParams?.id1 ?: payload?.id1
+    def id2 = attributes?.uriParams?.id2 ?: payload?.id2
+    def id3 = attributes?.uriParams?.id3 ?: payload?.id3
+
+    def xml = '<?xml version="1.0" encoding="UTF-8"?>' +
+      '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="">' +
+      '<soapenv:Body>' +
+        '<get_most_expensive_request>' +
+          '<id1>' + id1 + '</id1>' +
+          '<id2>' + id2 + '</id2>' +
+          '<id3>' + id3 + '</id3>' +
+        '</get_most_expensive_request>' +
+      '</soapenv:Body>' +
+      '</soapenv:Envelope>'
+
+    message.setPayload(xml)
+  ]]></scripting:code>
+</scripting:execute>
+
+    <!-- Call SOAP endpoint -->
+    <http:request config-ref="SOAP_Request_config" method="POST" path="/ws" doc:name="HTTP Request to SOAP endpoint - getMostExpensive">
+      <http:headers><![CDATA[#[output application/java
+---
+{
+  "Content-Type" : "text/xml; charset=UTF-8"
+}]]]></http:headers>
+      
+    </http:request>
+
+    <!-- Parse SOAP -> JSON (simple) -->
+    <scripting:execute engine="Groovy" doc:name="Parse SOAP response -> JSON">
+      <scripting:code><![CDATA[
+        def xml = new groovy.util.XmlSlurper(false, false).parseText(payload.toString())
+        def body = xml.Body
+        def first = body.children().find{ true } // первый элемент внутри Body
+
+        if (first == null) {
+          message.setPayload(null)
+          return
+        }
+
+        def err = first.'error'
+        if (err && err.size() > 0) {
+          def errorsList = []
+          if (err.errors && err.errors.error) {
+            err.errors.error.each { e -> errorsList << (e.text() ?: "") }
+          }
+          message.setPayload([
+            timestamp: (err.timestamp?.text() ?: ""),
+            message  : (err.message?.text() ?: ""),
+            errors   : errorsList
+          ])
+          return
+        }
+
+        def f = first.'flat'
+        if (f && f.size() > 0) {
+          def coord = f.coordinates
+          def house = f.house
+          message.setPayload([
+            id              : (f.id?.text() ? f.id.text().toInteger() : null),
+            creationDate    : (f.creation_date?.text() ?: null),
+            name            : (f.name?.text() ?: null),
+            coordinates     : [
+              x: (coord?.x?.text() ? coord.x.text().toInteger() : null),
+              y: (coord?.y?.text() ? new BigDecimal(coord.y.text()) : null)
+            ],
+            area            : (f.area?.text() ? f.area.text().toInteger() : null),
+            number_of_rooms : (f.number_of_rooms?.text() ? f.number_of_rooms.text().toInteger() : null),
+            living_space    : (f.living_space?.text() ? new BigDecimal(f.living_space.text()) : null),
+            price           : (f.price?.text() ? f.price.text().toInteger() : null),
+            has_balcony     : (f.has_balcony?.text() ? f.has_balcony.text().toBoolean() : null),
+            furnish         : (f.furnish?.text() ?: null),
+            transport       : (f.transport?.text() ?: null),
+            house           : [ name: (house?.name?.text() ?: null) ]
+          ])
+          return
+        }
+
+        message.setPayload(null)
+      ]]></scripting:code>
+    </scripting:execute>
+
+    <logger level="INFO" doc:name="Logger - getMostExpensive response" message="Returning JSON: #[payload]"/>
+  </flow>
+
+</mule>

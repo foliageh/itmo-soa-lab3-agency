@@ -44,7 +44,7 @@
     <xs:complexType name="flat">
         <xs:sequence>
             <xs:element name="id" type="xs:int"/>
-            <xs:element name="creation_date" type="xs:string"/>
+            <xs:element name="creationDate" type="xs:string"/>
             <xs:element name="name" type="xs:string"/>
             <xs:element name="coordinates" type="tns:coordinates"/>
             <xs:element name="area" type="xs:int" minOccurs="0"/>

@@ -16,7 +16,7 @@ public class FlatMapper {
         
         FlatSoapDto dto = new FlatSoapDto();
         dto.setId(flat.getId());
-        dto.setCreation_date(flat.getCreationDate() != null ? flat.getCreationDate().toString() : null);
+        dto.setCreationDate(flat.getCreationDate() != null ? flat.getCreationDate().toString() : null);
         dto.setName(flat.getName());
         dto.setArea(flat.getArea());
         dto.setNumber_of_rooms(flat.getNumberOfRooms());
